@@ -34,13 +34,14 @@ const client = new line.Client(config);
 
 //call GPT API 
 async function callGPT (lineMsg) {
+	// TODO 加入 SQLite 以記錄 上文  以便 傳送給 GPT
 	try {
 		const completion = await openai.createChatCompletion({
 		//model 列表  https://platform.openai.com/docs/models/model-endpoint-compatibility
 		// role 有 system, user, assistant, or function  (不過 我不知道 role:function 是什麼含義)
 		//https://platform.openai.com/docs/api-reference/chat/create
 			"model": "gpt-3.5-turbo",
-			"messages": [{ "role": "user", "content": "你將扮演知識淵博的朋友，以繁體中文回覆" }, { "role": "user", "content": lineMsg }]
+			"messages": [{ "role": "system", "content": "你將扮演知識淵博的朋友,以戰鎚40000中獸人的口吻回答,WAAAGH!,以繁體中文回覆" }, { "role": "user", "content": lineMsg }]
 		});
 
 		//console.log("COMPLETION", completion.data.choices);

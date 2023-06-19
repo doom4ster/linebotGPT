@@ -36,6 +36,9 @@ const client = new line.Client(config);
 async function callGPT (lineMsg) {
 	try {
 		const completion = await openai.createChatCompletion({
+		//model 列表  https://platform.openai.com/docs/models/model-endpoint-compatibility
+		// role 有 system, user, assistant, or function  (不過 我不知道 role:function 是什麼含義)
+		//https://platform.openai.com/docs/api-reference/chat/create
 			"model": "gpt-3.5-turbo",
 			"messages": [{ "role": "user", "content": "你將扮演知識淵博的朋友，以繁體中文回覆" }, { "role": "user", "content": lineMsg }]
 		});
@@ -82,7 +85,7 @@ async function handleEvent(event) {
 }
 
 // listen on port
-const port = process.env.PORT || 80;
+const port = process.env.PORT || 3000;
 app.listen(port, () => {
   console.log(`listening on ${port}`);
 });

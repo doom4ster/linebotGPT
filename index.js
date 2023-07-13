@@ -94,10 +94,12 @@ async function handleEvent (event) {
 			console.log(row)
 			linehistory.push(row.text)
 		});
+
+		linehistory.reverse();
+		console.log("linehistory", linehistory);
 	});
 
-	linehistory.reverse();
-	console.log("linehistory", linehistory);
+
 
 	db.all("SELECT * FROM gpt_messages WHERE userId = ? AND groupId = ? ORDER BY id DESC LIMIT 10", event.source.userId, event.source.groupId, function (err, rows) {
 		if (err) {
@@ -108,10 +110,11 @@ async function handleEvent (event) {
 			console.log(row)
 			gpthistory.push(row.gptMsg)
 		});
+		gpthistory.reverse();
+		console.log("gpthistory", gpthistory);
 	});
 
-	gpthistory.reverse();
-	console.log("gpthistory", gpthistory);
+
 
 	// 插入一条数据
 	var lineMsgInsert = db.prepare("INSERT INTO line_messages (message_type, message_id, text, webhookEventId, isRedelivery, timestamp, source_type, userId, groupId, replyToken, mode) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");

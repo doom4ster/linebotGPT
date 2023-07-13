@@ -99,6 +99,7 @@ async function handleEvent (event) {
 
 		linehistory.reverse();
 		console.log("linehistory", linehistory);
+		
 		db.all("SELECT * FROM gpt_messages WHERE userId = ? AND groupId = ? ORDER BY id DESC LIMIT 10", event.source.userId, event.source.groupId, function(err, rows) {
 			if (err) {
 				console.error(err.message);
@@ -129,7 +130,7 @@ async function handleEvent (event) {
 	// create a echoing text message
 	const echo = { type: 'text', text: gptMsg };
 
-	db.close();
+	//db.close();
 	// use reply API
 	return client.replyMessage(event.replyToken, echo);
 }

@@ -93,19 +93,21 @@ async function handleEvent (event) {
 			}
 			// 打印查询到的行
 			rows.forEach((row) => {
+				console.log(row)
 				linehistory.push(row.text)
 			});
 		});
 
 		linehistory.reverse();
 		console.log("linehistory", linehistory);
-		
+
 		db.all("SELECT * FROM gpt_messages WHERE userId = ? AND groupId = ? ORDER BY id DESC LIMIT 10", event.source.userId, event.source.groupId, function(err, rows) {
 			if (err) {
 				console.error(err.message);
 			}
 			// 打印查询到的行
 			rows.forEach((row) => {
+				console.log(row)
 				gpthistory.push(row.gptMsg)
 			});
 		});

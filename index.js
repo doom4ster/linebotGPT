@@ -82,44 +82,42 @@ async function handleEvent (event) {
 		return Promise.resolve(null);
 	}
 
-	let linehistory=[];//user 發的 line history
-	let gpthistory=[];//gpt 回應的 line history
+	let linehistory = [];//user 發的 line history
+	let gpthistory = [];//gpt 回應的 line history
 
-	db.serialize(function () {
-
-		db.all("SELECT * FROM line_messages WHERE userId = ? AND groupId = ? ORDER BY id DESC LIMIT 10", event.source.userId, event.source.groupId, function (err, rows) {
-			if (err) {
-				console.error(err.message);
-			}
-			// 打印查询到的行
-			rows.forEach((row) => {
-				console.log(row)
-				linehistory.push(row.text)
-			});
+	db.all("SELECT * FROM line_messages WHERE userId = ? AND groupId = ? ORDER BY id DESC LIMIT 10", event.source.userId, event.source.groupId, function (err, rows) {
+		if (err) {
+			console.error(err.message);
+		}
+		// 打印查询到的行
+		rows.forEach((row) => {
+			console.log(row)
+			linehistory.push(row.text)
 		});
-
-		linehistory.reverse();
-		console.log("linehistory", linehistory);
-
-		db.all("SELECT * FROM gpt_messages WHERE userId = ? AND groupId = ? ORDER BY id DESC LIMIT 10", event.source.userId, event.source.groupId, function(err, rows) {
-			if (err) {
-				console.error(err.message);
-			}
-			// 打印查询到的行
-			rows.forEach((row) => {
-				console.log(row)
-				gpthistory.push(row.gptMsg)
-			});
-		});
-
-		gpthistory.reverse();
-		console.log("gpthistory", gpthistory);
-
-		// 插入一条数据
-		var lineMsgInsert = db.prepare("INSERT INTO line_messages (message_type, message_id, text, webhookEventId, isRedelivery, timestamp, source_type, userId, groupId, replyToken, mode) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-		lineMsgInsert.run(event.message.type, event.message.id, event.message.text, event.webhookEventId, event.deliveryContext.isRedelivery, event.timestamp, event.source.type, event.source.userId, event.source.groupId, event.replyToken, event.mode);
-		lineMsgInsert.finalize();
 	});
+
+	linehistory.reverse();
+	console.log("linehistory", linehistory);
+
+	db.all("SELECT * FROM gpt_messages WHERE userId = ? AND groupId = ? ORDER BY id DESC LIMIT 10", event.source.userId, event.source.groupId, function (err, rows) {
+		if (err) {
+			console.error(err.message);
+		}
+		// 打印查询到的行
+		rows.forEach((row) => {
+			console.log(row)
+			gpthistory.push(row.gptMsg)
+		});
+	});
+
+	gpthistory.reverse();
+	console.log("gpthistory", gpthistory);
+
+	// 插入一条数据
+	var lineMsgInsert = db.prepare("INSERT INTO line_messages (message_type, message_id, text, webhookEventId, isRedelivery, timestamp, source_type, userId, groupId, replyToken, mode) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+	lineMsgInsert.run(event.message.type, event.message.id, event.message.text, event.webhookEventId, event.deliveryContext.isRedelivery, event.timestamp, event.source.type, event.source.userId, event.source.groupId, event.replyToken, event.mode);
+	lineMsgInsert.finalize();
+
 
 
 	let gptMsg = await callGPT(event.message.text);
@@ -141,4 +139,5 @@ async function handleEvent (event) {
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
 	console.log(`listening on ${port}`);
+	db.serialize(function () { })
 });

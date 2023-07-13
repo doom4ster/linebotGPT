@@ -85,7 +85,7 @@ async function handleEvent(event) {
 	db.serialize(function() {
 		// 插入一条数据
 		var stmt = db.prepare("INSERT INTO line_messages (message_type, message_id, text, webhookEventId, isRedelivery, timestamp, source_type, userId, replyToken, mode) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-		stmt.run(data.message.type, data.message.id, data.message.text, data.webhookEventId, data.deliveryContext.isRedelivery, data.timestamp, data.source.type, data.source.userId, data.replyToken, data.mode);
+		stmt.run(event.message.type, event.message.id, event.message.text, event.webhookEventId, event.deliveryContext.isRedelivery, event.timestamp, event.source.type, event.source.userId, event.replyToken, event.mode);
 		stmt.finalize();
 	});
 

@@ -82,15 +82,30 @@ async function handleEvent(event) {
     return Promise.resolve(null);
   }
 
-	db.serialize(function() {
-		// 插入一条数据
-		var stmt = db.prepare("INSERT INTO line_messages (message_type, message_id, text, webhookEventId, isRedelivery, timestamp, source_type, userId, replyToken, mode) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-		stmt.run(event.message.type, event.message.id, event.message.text, event.webhookEventId, event.deliveryContext.isRedelivery, event.timestamp, event.source.type, event.source.userId, event.replyToken, event.mode);
-		stmt.finalize();
-	});
-
+	if(event.source.groupId){
+		db.serialize(function() {
+			// 插入一条数据
+			var lineMsgInsert = db.prepare("INSERT INTO line_messages (message_type, message_id, text, webhookEventId, isRedelivery, timestamp, source_type, userId, groupId, replyToken, mode) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+			lineMsgInsert.run(event.message.type, event.message.id, event.message.text, event.webhookEventId, event.deliveryContext.isRedelivery, event.timestamp, event.source.type, event.source.userId, event.source.groupId, event.replyToken, event.mode);
+			lineMsgInsert.finalize();
+		});
+	}else{
+		db.serialize(function() {
+			// 插入一条数据
+			var lineMsgInsert = db.prepare("INSERT INTO line_messages (message_type, message_id, text, webhookEventId, isRedelivery, timestamp, source_type, userId, replyToken, mode) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+			lineMsgInsert.run(event.message.type, event.message.id, event.message.text, event.webhookEventId, event.deliveryContext.isRedelivery, event.timestamp, event.source.type, event.source.userId, event.replyToken, event.mode);
+			lineMsgInsert.finalize();
+		});
+	}
+	
 
 	let gptMsg = await callGPT(event.message.text);
+
+	var gptMsgInsert = db.prepare("INSERT INTO got_messages (gptMsg, userId, groupId) VALUES (?, ?, ?)");
+  gptMsgInsert.run(gptMessage, event.source.userId, event.source.groupId);
+  gptMsgInsert.finalize();
+
+
   // create a echoing text message
   const echo = { type: 'text', text: gptMsg };
 	

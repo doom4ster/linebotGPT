@@ -14,6 +14,11 @@ npm install express --save
 npm install openai
 ```
 
+安裝 sqlite
+```
+npm install sqlite3
+```
+
 環境變數使用
 ```
 npm install dotenv

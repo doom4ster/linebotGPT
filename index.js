@@ -1,5 +1,7 @@
 //載入環境變數
 require('dotenv').config();
+
+const systemPrompt = require('./systemPrompt.js');
 // 引用linebot SDK
 var linebot = require('linebot');
 const line = require('@line/bot-sdk');
@@ -8,6 +10,9 @@ const express = require('express');
 
 //引用 request library
 const request = require('request')
+
+var sqlite3 = require('sqlite3').verbose();
+var db = new sqlite3.Database('./linebot.db');
 
 //載入OPENAI
 const { Configuration, OpenAIApi } = require("openai");
@@ -41,7 +46,7 @@ async function callGPT (lineMsg) {
 		// role 有 system, user, assistant, or function  (不過 我不知道 role:function 是什麼含義)
 		//https://platform.openai.com/docs/api-reference/chat/create
 			"model": "gpt-3.5-turbo",
-			"messages": [{ "role": "system", "content": "你將扮演知識淵博的朋友,以戰鎚40000中獸人的口吻回答,WAAAGH!,以繁體中文回覆" }, { "role": "user", "content": lineMsg }]
+			"messages": [{ "role": "system", "content": systemPrompt }, { "role": "user", "content": lineMsg }]
 		});
 
 		//console.log("COMPLETION", completion.data.choices);
@@ -77,10 +82,19 @@ async function handleEvent(event) {
     return Promise.resolve(null);
   }
 
+	db.serialize(function() {
+		// 插入一条数据
+		var stmt = db.prepare("INSERT INTO line_messages (message_type, message_id, text, webhookEventId, isRedelivery, timestamp, source_type, userId, replyToken, mode) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+		stmt.run(data.message.type, data.message.id, data.message.text, data.webhookEventId, data.deliveryContext.isRedelivery, data.timestamp, data.source.type, data.source.userId, data.replyToken, data.mode);
+		stmt.finalize();
+	});
+
+
 	let gptMsg = await callGPT(event.message.text);
   // create a echoing text message
   const echo = { type: 'text', text: gptMsg };
-
+	
+	db.close();
   // use reply API
   return client.replyMessage(event.replyToken, echo);
 }

@@ -102,7 +102,7 @@ async function handleEvent(event) {
 	let gptMsg = await callGPT(event.message.text);
 
 	var gptMsgInsert = db.prepare("INSERT INTO got_messages (gptMsg, userId, groupId) VALUES (?, ?, ?)");
-  gptMsgInsert.run(gptMessage, event.source.userId, event.source.groupId);
+  gptMsgInsert.run(gptMsg, event.source.userId, event.source.groupId);
   gptMsgInsert.finalize();
 
 

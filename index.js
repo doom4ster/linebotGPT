@@ -99,7 +99,7 @@ async function handleEvent (event) {
 
 		linehistory.reverse();
 		console.log("linehistory", linehistory);
-		db.all("SELECT * FROM gpt_messages WHERE userId = ? AND groupId = ? ORDER BY id DESC LIMIT 10", userId, groupId, function(err, rows) {
+		db.all("SELECT * FROM gpt_messages WHERE userId = ? AND groupId = ? ORDER BY id DESC LIMIT 10", event.source.userId, event.source.groupId, function(err, rows) {
 			if (err) {
 				console.error(err.message);
 			}
